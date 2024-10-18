@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Notas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="index.html" class="active">aluno</a>
+        <a href="notas.html">nota</a>
+        <a href="consulta.html">consulta</a>
+    </nav>
+    <h1>Cadastro de Alunos</h1>
+    <main>
+    <form id="formCadastroAluno">
+        <label for="cgm">CGM:</label>
+        <input type="text" id="cgm" name="cgm" required>
+        <label for="nome">Nome do Aluno:</label>
+        <input type="text" id="nome" name="nome" required>
+        <label for="data_nascimento">Data de Nascimento:</label>
+        <input type="date" id="data_nascimento" name="data_nascimento" required>
+        <button type="button" onclick="cadastrarAluno()">Cadastrar Aluno</button>
+    </form>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
+

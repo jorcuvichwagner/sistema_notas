@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Alunos e Notas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="index.html">aluno</a>
+        <a href="notas.html">nota</a>
+        <a href="consulta.html" class="active">consulta</a>
+    </nav>
+    <h1>Consulta de Alunos e Notas</h1>
+    <main>
+        <form id="formConsulta">
+            <label for="nome">Nome do Aluno:</label>
+            <input type="text" id="nome" name="nome">
+            
+            <label for="cgm">CGM do Aluno:</label>
+            <input type="text" id="cgm" name="cgm">
+
+            <label for="materia">Matéria:</label>
+            <input type="text" id="materia" name="materia">
+            
+            <label for="notaMin">Nota Mínima:</label>
+            <input type="number" id="notaMin" name="notaMin" step="0.1" min="0" max="10">
+            
+            <label for="notaMax">Nota Máxima:</label>
+            <input type="number" id="notaMax" name="notaMax" step="0.1" min="0" max="10">
+
+            <button onclick="consultarAlunos()">Consultar</button>
+        </form>
+
+        <table id="resultadoConsulta" border="1">
+            <thead>
+                <tr>
+                    <th>CGM</th>
+                    <th>Nome</th>
+                    <th>Matéria</th>
+                    <th>Nota</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Resultados serão inseridos aqui -->
+            </tbody>
+        </table>
+    </main>
+
+</body>
+</html>
+
