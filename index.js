@@ -79,58 +79,58 @@ app.post('/cadastrar-nota', (req, res) => {
 // Rota para buscar alunos (autocomplete no front-end)
 app.get('/buscar-aluno', (req, res) => {
     const query = req.query.query;
+
+    // Busca no banco de dados com base no CGM ou Nome
     db.all("SELECT cgm, nome FROM alunos WHERE cgm LIKE ? OR nome LIKE ?", [`%${query}%`, `%${query}%`], (err, rows) => {
         if (err) {
             console.error('Erro ao buscar alunos:', err);
             res.status(500).send('Erro ao buscar alunos');
         } else {
-            res.json(rows);
+            res.json(rows);  // Retorna os alunos encontrados
         }
     });
 });
 
-// Rota para consultar alunos e notas
 app.get('/consultar-alunos', (req, res) => {
     const { nome, cgm, materia, notaMin, notaMax } = req.query;
 
-    let sql = `
-        SELECT a.cgm, a.nome, n.disciplina AS materia, n.nota
-        FROM alunos a
-        LEFT JOIN notas n ON a.cgm = n.cgm_aluno
-        WHERE 1 = 1
-    `;
-    const params = [];
+    let sql = "SELECT alunos.cgm, alunos.nome, notas.disciplina AS materia, notas.nota FROM alunos LEFT JOIN notas ON alunos.cgm = notas.cgm_aluno WHERE 1=1"; // 1=1 para facilitar a construção da query
+    let params = [];
 
     if (nome) {
-        sql += " AND a.nome LIKE ?";
-        params.push(`%${nome}%`);
+        sql += " AND alunos.nome LIKE ?";
+        params.push(`%${nome}%`); // Adiciona o parâmetro da busca
     }
+
     if (cgm) {
-        sql += " AND a.cgm LIKE ?";
-        params.push(`%${cgm}%`);
+        sql += " AND alunos.cgm LIKE ?";
+        params.push(`%${cgm}%`); // Adiciona o parâmetro da busca
     }
+
     if (materia) {
-        sql += " AND n.disciplina LIKE ?";
-        params.push(`%${materia}%`);
+        sql += " AND notas.disciplina LIKE ?";
+        params.push(`%${materia}%`); // Adiciona o parâmetro da busca
     }
+
     if (notaMin) {
-        sql += " AND n.nota >= ?";
-        params.push(notaMin);
+        sql += " AND notas.nota >= ?";
+        params.push(notaMin); // Adiciona o parâmetro da busca
     }
+
     if (notaMax) {
-        sql += " AND n.nota <= ?";
-        params.push(notaMax);
+        sql += " AND notas.nota <= ?";
+        params.push(notaMax); // Adiciona o parâmetro da busca
     }
 
     db.all(sql, params, (err, rows) => {
         if (err) {
             console.error('Erro ao consultar alunos:', err);
-            res.status(500).send('Erro ao consultar alunos');
-        } else {
-            res.json(rows);
+            return res.status(500).send('Erro ao consultar alunos.');
         }
+        res.json(rows); // Retorna os alunos encontrados
     });
 });
+
 
 // Teste para ver se o servidor está rodando
 app.get('/', (req, res) => {
@@ -141,3 +141,4 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log(`Servidor rodando na porta ${port}`);
 });
+
