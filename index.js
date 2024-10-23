@@ -5,18 +5,18 @@ const sqlite3 = require('sqlite3').verbose();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// serve os arquivos estáticos (html, css) da pasta "public"
+// Serve os arquivos estáticos (HTML, CSS, JS) da pasta "public"
 app.use(express.static('public'));
 
-// configura o body-parser para ler JSON
+// Configura o body-parser para ler JSON
 app.use(bodyParser.json());
 
-// conectando ao banco de dados SQLite
+// Conectando ao banco de dados SQLite
 const db = new sqlite3.Database('escola.db');
 
-// criar as tabelas se não existirem
+// Criar as tabelas se não existirem
 db.serialize(() => {
-    // criar a tabela alunos
+    // Criar a tabela alunos
     db.run(`
         CREATE TABLE IF NOT EXISTS alunos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,7 +32,7 @@ db.serialize(() => {
         }
     });
 
-    // criar a tabela notas
+    // Criar a tabela notas
     db.run(`
         CREATE TABLE IF NOT EXISTS notas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -50,25 +50,94 @@ db.serialize(() => {
     });
 });
 
-//app.post('/cadastrar-aluno', (req, res) => {
-//    const { cgm, nome, data_nascimento } = req.body;
-//    db.run("INSERT INTO alunos (cgm, nome, data_nascimento) VALUES (?, ?, ?)", [cgm, nome, data_nascimento]);
-//    res.send('Aluno cadastrado com sucesso!');
-//});
+// Rota para cadastrar um aluno
+app.post('/cadastrar-aluno', (req, res) => {
+    const { cgm, nome, d_n } = req.body;  // 'd_n' é a data de nascimento
+    db.run("INSERT INTO alunos (cgm, nome, data_nascimento) VALUES (?, ?, ?)", [cgm, nome, d_n], function(err) {
+        if (err) {
+            console.error('Erro ao cadastrar aluno:', err);
+            res.status(500).send('Erro ao cadastrar aluno');
+        } else {
+            res.send('Aluno cadastrado com sucesso!');
+        }
+    });
+});
 
-//app.post('/cadastrar-nota', (req, res) => {
-//   const { cgm_aluno, disciplina, nota } = req.body;
-//    db.run("INSERT INTO notas (cgm_aluno, disciplina, nota) VALUES (?, ?, ?)", [cgm_aluno, disciplina, nota]);
-//    res.send('Nota cadastrada com sucesso!');
-//});
+// Rota para cadastrar uma nota
+app.post('/cadastrar-nota', (req, res) => {
+    const { cgmAluno, materia, nota } = req.body;
+    db.run("INSERT INTO notas (cgm_aluno, disciplina, nota) VALUES (?, ?, ?)", [cgmAluno, materia, nota], function(err) {
+        if (err) {
+            console.error('Erro ao cadastrar nota:', err);
+            res.status(500).send('Erro ao cadastrar nota');
+        } else {
+            res.send('Nota cadastrada com sucesso!');
+        }
+    });
+});
 
-// teste para ver se o servidor está rodando
+// Rota para buscar alunos (autocomplete no front-end)
+app.get('/buscar-aluno', (req, res) => {
+    const query = req.query.query;
+    db.all("SELECT cgm, nome FROM alunos WHERE cgm LIKE ? OR nome LIKE ?", [`%${query}%`, `%${query}%`], (err, rows) => {
+        if (err) {
+            console.error('Erro ao buscar alunos:', err);
+            res.status(500).send('Erro ao buscar alunos');
+        } else {
+            res.json(rows);
+        }
+    });
+});
+
+// Rota para consultar alunos e notas
+app.get('/consultar-alunos', (req, res) => {
+    const { nome, cgm, materia, notaMin, notaMax } = req.query;
+
+    let sql = `
+        SELECT a.cgm, a.nome, n.disciplina AS materia, n.nota
+        FROM alunos a
+        LEFT JOIN notas n ON a.cgm = n.cgm_aluno
+        WHERE 1 = 1
+    `;
+    const params = [];
+
+    if (nome) {
+        sql += " AND a.nome LIKE ?";
+        params.push(`%${nome}%`);
+    }
+    if (cgm) {
+        sql += " AND a.cgm LIKE ?";
+        params.push(`%${cgm}%`);
+    }
+    if (materia) {
+        sql += " AND n.disciplina LIKE ?";
+        params.push(`%${materia}%`);
+    }
+    if (notaMin) {
+        sql += " AND n.nota >= ?";
+        params.push(notaMin);
+    }
+    if (notaMax) {
+        sql += " AND n.nota <= ?";
+        params.push(notaMax);
+    }
+
+    db.all(sql, params, (err, rows) => {
+        if (err) {
+            console.error('Erro ao consultar alunos:', err);
+            res.status(500).send('Erro ao consultar alunos');
+        } else {
+            res.json(rows);
+        }
+    });
+});
+
+// Teste para ver se o servidor está rodando
 app.get('/', (req, res) => {
     res.send('Servidor no Replit está rodando e tabelas criadas!');
 });
 
-// iniciando o servidor
+// Iniciando o servidor
 app.listen(port, () => {
     console.log(`Servidor rodando na porta ${port}`);
 });
-
